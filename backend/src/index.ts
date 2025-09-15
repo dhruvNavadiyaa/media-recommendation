@@ -5,6 +5,8 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { PORT } from "./config/env";
 import db from "./config/db";
+import { errorHandler } from "./middlewares/errorHandler.middleware";
+import authRouter from "./router/auth.router";
 
 
 
@@ -23,6 +25,13 @@ app.use(cookieParser());
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms ")
 );
+
+app.use("/api/auth", authRouter);
+
+
+
+
+app.use(errorHandler);
 
 
 
