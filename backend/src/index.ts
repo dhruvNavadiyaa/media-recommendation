@@ -7,8 +7,7 @@ import { PORT } from "./config/env";
 import db from "./config/db";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import authRouter from "./router/auth.router";
-
-
+import videoRouter from "./router/video.router";
 
 const corsOptions = {
   origin: true,
@@ -27,13 +26,9 @@ app.use(
 );
 
 app.use("/api/auth", authRouter);
-
-
-
+app.use("/api/video", videoRouter);
 
 app.use(errorHandler);
-
-
 
 app.listen(PORT, () => {
   console.log(`Running on ${PORT}`);
