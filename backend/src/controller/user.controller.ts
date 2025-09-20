@@ -4,6 +4,8 @@ import { AppError } from "../utils/AppError";
 import { successResponse } from "../utils/response";
 import jwt from "jsonwebtoken";
 import { TOKEN_EXPIRES, TOKEN_SECRATE } from "../config/env";
+import { emailQueue } from "../config/redis";
+import { generateOTP } from "../utils/commonFunc";
 
 const signUp: RequestHandler = async (req, res) => {
   const { name, email, password } = req.body;
@@ -46,6 +48,37 @@ const verifyOTP: RequestHandler = async (req, res) => {
   });
 };
 
+const sendOtp: RequestHandler = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError("User don't exists", 400);
+  }
+  const otp = generateOTP();
+
+  user.otp = {
+    code: otp,
+    sendAt: new Date(),
+  };
+  await user.save();
+
+  await emailQueue.add(
+    "send-otp-mail",
+    {
+      to: user.email,
+      subject: "Your OTP Code",
+      html: `<p>Your OTP is <b>${otp}</b>. It will expire in 5 minutes.</p>`,
+    },
+    {
+      priority: 1,
+      removeOnComplete: true,
+      attempts: 3,
+    }
+  );
+  successResponse(res, 200, "OTP has been sent to your email");
+};
+
 const signIn: RequestHandler = async (req, res) => {
   const { email, password } = req.body;
 
@@ -74,4 +107,4 @@ const signIn: RequestHandler = async (req, res) => {
   });
 };
 
-export { signUp, verifyOTP, signIn };
+export { signUp, verifyOTP, signIn, sendOtp };

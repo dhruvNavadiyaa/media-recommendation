@@ -8,6 +8,7 @@ import db from "./config/db";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import authRouter from "./router/auth.router";
 import videoRouter from "./router/video.router";
+import "./workers/emailWorker";
 
 const corsOptions = {
   origin: true,
